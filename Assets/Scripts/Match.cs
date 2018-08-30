@@ -18,6 +18,14 @@ public class Match : MonoBehaviour {
     Card.Slot homeType;
     Card.Slot awayType;
 
+    // Discard Piles
+    // Retrieve both discard piles
+    GameObject HomeDiscard;
+    GameObject AwayDiscard;
+    // Get their scripts too
+    DiscardPile HomeScript;
+    DiscardPile AwayScript;
+
 
     // Use this for initialization
     void Start () {
@@ -63,11 +71,30 @@ public class Match : MonoBehaviour {
         awayType = AwayCard.GetComponent<Card>().cardType;
     }
 
+    public void SendToDiscard()
+    {
+        // Retrieve both discard piles
+        HomeDiscard = GameObject.Find("Home Discard Pile");
+        AwayDiscard = GameObject.Find("Away Discard Pile");
+
+        // Error if it can't find either of them
+        if (HomeDiscard == null || AwayDiscard == null)
+        {
+            Debug.Log("ERROR: Unable to find one or more discard piles");
+            return;
+        }
+
+        // Send both Cards to their respective piles
+        HomeCard.transform.SetParent(HomeDiscard.transform);
+        AwayCard.transform.SetParent(AwayDiscard.transform);
+
+        // Trigger Discard Piles updates
+        HomeDiscard.GetComponent<DiscardPile>().SetOnlyTopChildVisible();
+        AwayDiscard.GetComponent<DiscardPile>().SetOnlyTopChildVisible();
+    }
+
     public void DetermineScore()
     {
-        // First get the card data from the field
-        RetrieveCards();
-        
         // Determine the winner of the current player matchup
         // First dermine - Are either cards goalies?
         if (homeType == Card.Slot.Goalie || awayType == Card.Slot.Goalie)
@@ -144,4 +171,15 @@ public class Match : MonoBehaviour {
 
         }
     }
+
+    public void CardMatchup()
+    {
+        // First retrieve the cards we're using
+        RetrieveCards();
+        // Then determine which team scores
+        DetermineScore();
+        // Then send each card to the discard pile
+        SendToDiscard();
+    }
+
 }
